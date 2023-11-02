@@ -3,23 +3,22 @@ package CSE306;
 import java.io.*;
 import java.net.*;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.*;
+
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
 
 public class DownloadAndPlay {
 
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
+
 //		String link = "C:\\Users\\nguye\\Desktop\\sample1.wav";
 //		Playsound(link);
 //
-//		String link = "https://www.tanbinhtech.com:8443/sample1.wav";
+		String link = "http://ice10.outlaw.fm/KIEV2";
 //		Download(link);
 //		DownloadFirstAndPlay(link);
-//		PlayOnline(link);
+		PlayOnline(link);
 
 	}
 
@@ -27,12 +26,14 @@ public class DownloadAndPlay {
 		File file = new File(filePath);
 
 		try {
+			AudioInputStream ais = AudioSystem.getAudioInputStream(file);
 			Clip clip = AudioSystem.getClip();
-			clip.open(AudioSystem.getAudioInputStream(file));
-			clip.start();
 
+			clip.open(ais);
+			clip.start();
 			Thread.sleep(clip.getMicrosecondLength() / 1000);
 
+			clip.close();
 		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException | InterruptedException e) {
 			System.out.println(e);
 		}
@@ -68,23 +69,46 @@ public class DownloadAndPlay {
 		Playsound(filePathText);
 	}
 
-	static void DownAndPlay(String link) {
+	private static final int BUFFER_SIZE = 4096;
 
+	static void DownAndPlay(String link) {
+		try {
+			URL url = new URL(link);
+
+			InputStream iS = url.openStream();
+			iS = new BufferedInputStream(iS);
+
+			AudioInputStream audioStream = AudioSystem.getAudioInputStream(url);
+			AudioFormat audioFormat = audioStream.getFormat();
+			DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+
+			SourceDataLine sourceDataLine = (SourceDataLine) AudioSystem.getLine(info);
+			sourceDataLine.open(audioFormat);
+			sourceDataLine.start();
+			byte[] bufferBytes = new byte[BUFFER_SIZE];
+			int readBytes = -1;
+			while ((readBytes = audioStream.read(bufferBytes)) != -1) {
+				sourceDataLine.write(bufferBytes, 0, readBytes);
+			}
+			sourceDataLine.drain();
+			sourceDataLine.close();
+			audioStream.close();
+
+		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+			System.out.println(e);
+		}
 	}
 
 	static void PlayOnline(String link) {
 		try {
 			URL url = new URL(link);
-			Clip clip = AudioSystem.getClip();
-			clip.open(AudioSystem.getAudioInputStream(url));
-			clip.start();
+			InputStream iS = url.openStream();
+			iS = new BufferedInputStream(iS);
+			Player mp3Player = new Player(iS);
+			mp3Player.play();
 
-			Thread.sleep(clip.getMicrosecondLength() / 1000);
-
-		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | InterruptedException e) {
-			e.printStackTrace();
+		} catch (IOException | JavaLayerException e) {
+			System.out.println(e);
 		}
-
 	}
-
 }
