@@ -1,30 +1,36 @@
 package CSE306;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 
 public class DayTimeClient {
 
 	public static void main(String[] args) {
 
-		String host = args.length > 0 ? args[0] : "time.nits.gov";
-		for (int i = 1; i < 1024; i++) {
-			
-			try {
-				Socket s = new Socket(host, i);
-				System.out.println("There is a server on port " + i + " of " + host);
-				s.close();
+		String host = args.length > 0 ? args[0] : "time.nist.gov";
 
-			} catch (UnknownHostException e) {
+		try {
+			Socket s = new Socket(host, 13);
+			InputStream in = s.getInputStream();
+			StringBuffer sb = new StringBuffer();
 
-				System.err.println(e);
-				break;
-
-			} catch (IOException e) {
-				
+			int c;
+			while ((c = in.read()) != -1) {
+				sb.append((char) c);
 			}
 
+	
+			System.out.println(sb);
+			s.close();
+		} catch (UnknownHostException e) {
+
+			System.err.println(e);
+
+		} catch (IOException e) {
+			System.err.println(e);
 		}
 
 	}
