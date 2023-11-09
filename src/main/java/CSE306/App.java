@@ -3,7 +3,7 @@ package CSE306;
 import org.apache.commons.codec.digest.DigestUtils;
 
 public class App {
-fsdfsdf
+
 	public static void main(String[] args) {
 
 		if (args.length < 1) {
