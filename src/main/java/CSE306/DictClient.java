@@ -21,7 +21,7 @@ public class DictClient {
 			OutputStream out = socket.getOutputStream();
 			Writer writer = new OutputStreamWriter(out, "UTF-8");
 			writer = new BufferedWriter(writer);
-			
+
 			InputStream in = socket.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 
