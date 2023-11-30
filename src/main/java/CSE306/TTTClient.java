@@ -28,13 +28,18 @@ public class TTTClient {
             // Enter data using BufferReader
             BufferedReader terminal = new BufferedReader(new InputStreamReader(System.in));
 
+            // Enter strategy from client
+            bout.write(args[0] + "\r\n");
+            bout.flush();
+
             String move = terminal.readLine();
             while (!(move.equals("quit"))) {
                 bout.write(move + "\r\n");
                 bout.flush();
-                readBoard(bif);
+                readBoard(bif, terminal, bout);
                 move = terminal.readLine();
             }
+
             bout.write("quit" + "\r\n");
             bout.flush();
             // socket.close();
@@ -52,12 +57,16 @@ public class TTTClient {
         }
     }
 
-    static void readBoard(BufferedReader bif) {
+    static void readBoard(BufferedReader bif, BufferedReader terminal, BufferedWriter bout) {
         try {
             String encodedBoard = bif.readLine();
             System.out.println(encodedBoard);
+            if (encodedBoard.contains("Choose")) {
+                String strategy = terminal.readLine();
+                bout.write(strategy + "\r\n");
+                bout.flush();
+            }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
