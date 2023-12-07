@@ -81,7 +81,7 @@ public class TTTServer extends Thread {
                                             // return new board
                                             out.write(board.encodeBoard() + " *** ");
                                             out.write("It's a draw!" + " *** ");
-                                            out.write("Let's play again!" + " *** " + "\r\n");
+                                            out.write("Let's play again!" + " *** ");
                                             out.write("Choose the strategy for next time: " + "\r\n");
                                             out.flush();
                                             board.initialize();
@@ -100,7 +100,7 @@ public class TTTServer extends Thread {
                                     // return new board
                                     out.write(board.encodeBoard() + " *** ");
                                     out.write("It's a draw!" + " *** ");
-                                    out.write("Let's play again!" + " *** " + "\r\n");
+                                    out.write("Let's play again!" + " *** ");
                                     out.write("Choose the strategy for next time: " + "\r\n");
                                     out.flush();
                                     board.initialize();
@@ -110,7 +110,7 @@ public class TTTServer extends Thread {
                                 // return new board
                                 out.write(board.encodeBoard() + " *** ");
                                 out.write("You won!" + " *** ");
-                                out.write("Let's play again!" + " *** " + "\r\n");
+                                out.write("Let's play again!" + " *** ");
                                 out.write("Choose the strategy for next time: " + "\r\n");
                                 out.flush();
                                 board.initialize();
