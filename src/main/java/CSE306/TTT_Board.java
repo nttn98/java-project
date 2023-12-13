@@ -1,33 +1,26 @@
 package main.java.CSE306;
 
-public abstract class Board {
-    public char[] board = new char[9];
-    private final static int[][] winners = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 3, 6 }, { 1, 4, 7 },
+public abstract class TTT_Board {
+    char[] board = new char[9];
+    private final int[][] winners = { { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, { 0, 3, 6 }, { 1, 4, 7 },
             { 2, 5, 8 }, { 0, 4, 8 }, { 2, 4, 6 } };
 
-    public Board() {
-        initialize();
+    public TTT_Board() {
     }
 
-    // initialize
     public void initialize() {
         for (int i = 0; i < this.board.length; i++) {
             this.board[i] = '-';
         }
     }
 
-    // check validity of move
     public boolean checkMove(int cell) {
         return this.board[cell] == '-';
     }
 
-    // check status for a player
-    // 0. player has not won yet
-    // 1. player won
-
     public int checkStatus(char player) {
         int status = 0;
-        //
+
         for (int[] winner : winners) {
             if (checkWinner(winner, player)) {
                 status = 1;
@@ -35,12 +28,11 @@ public abstract class Board {
             }
         }
         return status;
-
     }
 
     public int checkBoard() {
         int status = 1;
-        //
+
         for (char c : this.board) {
             if (c == '-') {
                 status = 0;
@@ -48,7 +40,6 @@ public abstract class Board {
             }
         }
         return status;
-
     }
 
     public boolean checkWinner(int[] winner, char player) {
@@ -59,35 +50,26 @@ public abstract class Board {
                 break;
             }
         }
-
         return check;
-
     }
 
-    // update board
     public void updateBoard(int cell) {
         this.board[cell] = 'o';
-        // return board;
-
     }
 
-    // make move
-    public void makeMove() {
-        for (int i = 0; i < this.board.length; i++) {
-            if (this.board[i] == '-') {
-                this.board[i] = 'x';
-                break;
-            }
-        }
-    }
+    public abstract void makeMove();
 
-    // encoding the current board
     public String encodeBoard() {
         StringBuilder builder = new StringBuilder();
         for (char c : this.board) {
             builder.append(c).append('.');
         }
         return builder.toString();
-
     }
+
+    public void setBoard(String boardString) {
+        boardString = boardString.replace(".", "");
+        this.board = boardString.toCharArray();
+    }
+
 }

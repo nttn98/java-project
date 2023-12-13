@@ -1,138 +1,98 @@
 package main.java.CSE306;
 
-import java.net.*;
 import java.io.*;
+import java.net.*;
 
-public class TTTServer extends Thread {
-    private final static int PORT = 10;
-
-    private Socket connection;
-    private String[] args;
-
-    public TTTServer(Socket connection, String[] args) {
-        this.connection = connection;
-        this.args = args;
-    }
-
+public class TTT_Server {
     public static void main(String[] args) throws IOException {
-        try (ServerSocket server = new ServerSocket(PORT)) {
+        try (ServerSocket server = new ServerSocket(10)) {
             while (true) {
                 Socket connection = server.accept();
-                Thread serverThread = new TTTServer(connection, args);
+                ServerThread serverThread = new ServerThread(connection);
                 serverThread.start();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    @Override
-    public void run() {
-        super.run();
-        try {
-            Writer out = new OutputStreamWriter(connection.getOutputStream());
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+    static class ServerThread extends Thread {
 
-            Board board = null;
+        private Socket connection;
 
-            String startegy = in.readLine();
+        public ServerThread(Socket connection) {
+            this.connection = connection;
+        }
 
-            if (startegy.equals("left")) {
-                board = new BoardLeft();
-            } else {
-                board = new BoardRight();
-            }
+        @Override
+        public void run() {
+            try {
+                Writer out = new OutputStreamWriter(connection.getOutputStream());
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-            while (true) {
+                TTT_Board board = null;
+                board = getStrategy(board, in.readLine());
 
-                String move = in.readLine();
-                if (move.equals("left")) {
-                    board = new BoardLeft();
-                    continue;
-                } else if (move.equals("right")) {
-                    board = new BoardRight();
-                    continue;
-                }
+                board.setBoard(in.readLine());
 
-                if (move.equals("quit")) {
-                    break;
-                } else {
-                    int cell = Character.getNumericValue(move.charAt(0));
-                    // check that the move is within range
-                    if (cell >= 0 && cell < 9) {
-                        // check that the move is to an empty cell
-                        boolean empty = board.checkMove(cell);
-                        // System.out.println(empty);
-                        if (empty) {
-                            /// update board
-                            board.updateBoard(cell);
-                            // check status for player 'o'
-                            // 0. player has not won yet
-                            // 1. player won
-                            if (board.checkStatus('o') == 0) {
-                                if (board.checkBoard() == 0) {
-                                    board.makeMove();
-                                    // check status for player 'x'
-                                    if (board.checkStatus('x') == 0) {
+                while (true) {
+                    String move = in.readLine();
 
-                                        if (board.checkBoard() == 0) {
-                                            // return new board
-                                            out.write(board.encodeBoard() + "\r\n");
-                                            out.flush();
+                    if (move.equals("quit")) {
+                        this.connection.close();
+                        break;
+                    } else {
+                        int cell = Character.getNumericValue(move.charAt(0));
+                        if (cell >= 0 && cell < 9) {
+                            boolean empty = board.checkMove(cell);
+                            if (empty) {
+                                board.updateBoard(cell);
+                                if (board.checkStatus('o') == 0) {
+                                    if (board.checkBoard() == 0) {
+                                        board.makeMove();
+                                        if (board.checkStatus('x') == 0) {
+                                            if (board.checkBoard() == 0) {
+                                                out.write("200#" + board.encodeBoard() + "\r\n");
+                                                out.flush();
+                                            } else {
+                                                out.write("201#" + board.encodeBoard() + "\r\n");
+                                                out.flush();
+                                            }
                                         } else {
-                                            // return new board
-                                            out.write(board.encodeBoard() + " *** ");
-                                            out.write("It's a draw!" + " *** ");
-                                            out.write("Let's play again!" + " *** ");
-                                            out.write("Choose the strategy for next time: " + "\r\n");
+                                            out.write("202#" + board.encodeBoard() + "\r\n");
                                             out.flush();
-                                            board.initialize();
                                         }
                                     } else {
-                                        // return new board
-                                        out.write(board.encodeBoard() + " *** ");
-                                        out.write("I won!" + " *** ");
-                                        out.write("Let's play again!" + " *** ");
-                                        out.write("Choose the strategy for next time: " + "\r\n");
+                                        out.write("201#" + board.encodeBoard() + "\r\n");
                                         out.flush();
-                                        board.initialize();
                                     }
-
                                 } else {
-                                    // return new board
-                                    out.write(board.encodeBoard() + " *** ");
-                                    out.write("It's a draw!" + " *** ");
-                                    out.write("Let's play again!" + " *** ");
-                                    out.write("Choose the strategy for next time: " + "\r\n");
+                                    out.write("203#" + board.encodeBoard() + "\r\n");
                                     out.flush();
-                                    board.initialize();
                                 }
-
                             } else {
-                                // return new board
-                                out.write(board.encodeBoard() + " *** ");
-                                out.write("You won!" + " *** ");
-                                out.write("Let's play again!" + " *** ");
-                                out.write("Choose the strategy for next time: " + "\r\n");
+                                out.write("204# " + "\r\n");
                                 out.flush();
-                                board.initialize();
                             }
-
                         } else {
-                            // return new board
-                            out.write("Occupied cell!" + "\r\n");
+                            out.write("205# " + "\r\n");
                             out.flush();
                         }
-
-                    } else {
-                        // return new board
-                        out.write("Wrong input!" + "\r\n");
-                        out.flush();
                     }
                 }
-
+                connection.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            connection.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+
+        private TTT_Board getStrategy(TTT_Board board, String strategy) {
+            if (strategy.equals("left")) {
+                board = new TTT_BoardLeft();
+            } else if (strategy.equals("right")) {
+                board = new TTT_BoardRight();
+            }
+            return board;
         }
     }
 }
