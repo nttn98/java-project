@@ -17,7 +17,6 @@ public class TTT_Server {
     }
 
     static class ServerThread extends Thread {
-
         private Socket connection;
 
         public ServerThread(Socket connection) {

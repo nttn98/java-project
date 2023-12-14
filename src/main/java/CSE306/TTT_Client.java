@@ -38,7 +38,6 @@ public class TTT_Client {
 
                 bout.write("quit" + "\r\n");
                 bout.flush();
-                socket.close();
 
                 move = terminal.readLine();
                 socket.close();
